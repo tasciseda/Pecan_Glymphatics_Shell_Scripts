@@ -1,0 +1,59 @@
+#!/bin/bash
+#SBATCH --job-name=batch_dwi		     			# Job name
+#SBATCH --mail-type=END,FAIL          			    # Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=<sumiresato@ufl.edu>  		    # Where to send mail
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=6                           # Run a single task
+#SBATCH --account=tpengzhao
+#SBATCH --qos=tpengzhao
+#SBATCH --mem=16000mb	                   	        # Memory limit
+#SBATCH --time=96:00:00               			    # Time limit hrs:min:sec
+#SBATCH --output=batch_dwi.%A_%a.out 	            # Standard output and error log
+#SBATCH --partition=gpu
+#SBATCH --gpus=geforce:2
+##SBATCH --array=0 #array range
+
+
+pwd; hostname; date
+
+subject_array=("sub-TKA006" "sub-TKA007" "sub-TKA009" "sub-TKA010" "sub-TKA011" "sub-TKA012" "sub-TKA013")
+
+# ######SUMIRE S Directory
+
+cd /blue/tpengzhao/sumiresato
+Shell_dir=/blue/tpengzhao/sumiresato/Shell_Scripts/Pecan_Glymphatics
+Matlab_dir=/blue/tpengzhao/sumiresato/Matlab/Pecan_Glymphatics
+Template_dir=/blue/tpengzhao/SHARED/MR_Templates
+
+for subject in "${subject_array[@]}"
+do
+
+    echo "Processing subject $subject"
+    
+    Subject_dir="/blue/tpengzhao/sumiresato/Practice_Data/${subject}/ses-pre"
+
+    TBSS_dir=TBSS_${subject}
+
+cd $Shell_dir
+
+./dwi_processing/preprocess_dwi.sh $Matlab_dir $Template_dir $Subject_dir $TBSS_dir drift_correction fieldmap_dti eddy_correction eddy_quad freewater_correction
+
+
+done
+
+
+## steps vv ##
+#drift_correction
+#fieldmap_dti
+#eddy_correction
+#eddy_correction_noFM
+#eddy_quad
+#cleanup_dti
+#freewater_correction
+
+
+
+# for this_subject in "${subject_array[@]}"; do
+# 	Subject_dir=/blue/rachaelseidler/share/FromExternal/Research_Projects_UF/CRUNCH/MiM_Data/${this_subject}
+# 	./dwi_processing/preprocess_dwi.sh $Matlab_dir $Template_dir $Subject_dir fieldmap_dti
+# done

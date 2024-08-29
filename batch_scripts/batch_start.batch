@@ -1,0 +1,46 @@
+#!/bin/bash
+#SBATCH --job-name=batch_start					# Job name
+#SBATCH --mail-type=END,FAIL          			# Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=<sumiresato@ufl.edu>  		# Where to send mail
+#SBATCH --cpus-per-task=2	
+#SBATCH --ntasks=1                    			# Run a single task
+#SBATCH --mem=12000mb	                   	    # Memory limit
+#SBATCH --account=tpengzhao
+#SBATCH --qos=tpengzhao
+#SBATCH --time=96:00:00               			# Time limit hrs:min:sec
+#SBATCH --output=batch_start.%A_%a.out 	# Standard output and error log
+#SBATCH --array=0-6	# array range
+pwd; hostname; date
+
+##### BATCH FILE INFO ######
+# 1) specify the anticipated memory for the job (>25% more than what it will actually use)
+# 2) specify the array (0-N) vector.. must be size of the subject_array.. starts with 0
+# 3) specify the subject_array
+# 4) make sure the directories are set to your repositories
+# 5) uncomment the step you would like to process for each subject specified in subject_array
+
+
+subject_array=("sub-TKA006" "sub-TKA007" "sub-TKA009" "sub-TKA010" "sub-TKA011" "sub-TKA012" "sub-TKA013")
+
+
+subject=${subject_array[$SLURM_ARRAY_TASK_ID]}
+Subject_dir=/blue/tpengzhao/sumiresato/Practice_Data/${subject}/ses-pre
+
+
+# ######SUMIRE S Directory
+
+cd /blue/tpengzhao/sumiresato
+Shell_dir=/blue/tpengzhao/sumiresato/Shell_Scripts/Pecan_Glymphatics
+Matlab_dir=/blue/tpengzhao/sumiresato/Matlab/Pecan_Glymphatics
+Template_dir=/blue/tpengzhao/SHARED/MR_Templates
+
+cd $Shell_dir
+
+./file_organization/organize_multidwi.sh $Matlab_dir $Template_dir $Subject_dir $subject
+./file_organization/file_organize_prepost.sh $Subject_dir
+./misc/biascorrect_and_skullstrip.sh $Matlab_dir $Template_dir $Subject_dir $subject n4_bias_correction skull_strip_t1_4_ants copy_t1
+#./file_organization/zip_raw_files.sh $Subject_dir
+
+
+
+

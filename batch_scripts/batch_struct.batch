@@ -1,0 +1,35 @@
+#!/bin/bash
+#SBATCH --job-name=batch_cat12		     			# Job name
+#SBATCH --mail-type=END,FAIL          			# Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=<sumiresato@ufl.edu>  		# Where to send mail
+#SBATCH --cpus-per-task=2
+#SBATCH --ntasks=1                    			# Run a single task
+#SBATCH --mem=16000mb	                   	    # Memory limit
+#SBATCH --qos=rachaelseidler
+#SBATCH --time=200:00:00               			# Time limit hrs:min:sec
+#SBATCH --output=batch_cat12.%A_%a.out 	# Standard output and error log
+##SBATCH --array=0								# array range
+pwd; hostname; date
+
+
+# ######SUMIRE S Directory
+
+# cd /blue/rachaelseidler/sumiresato
+# Shell_dir=/blue/rachaelseidler/sumiresato/MiM_Shell_Scripts
+# Matlab_dir=/blue/rachaelseidler/sumiresato/MiM_Matlab
+# Template_dir=/blue/rachaelseidler/sumiresato/MR_Templates
+
+####
+Study_dir=/blue/rachaelseidler/share/FromExternal/Research_Projects_UF/CRUNCH/MiM_Data
+
+
+cd $Study_dir
+
+ml matlab/2020b
+export MATLABPATH=${Matlab_dir}/helper
+matlab -nodesktop -nosplash -r "try; cat12StructuralAnalysis('subjects',{'2111','3129','3128'},'t1_folder','02_T1','t1_filename','T1.nii','steps_to_run_vector',[1 0 1 0 1 1 1 1 1 1],'template_dir','/blue/rachaelseidler/valay.shah/MR_Templates'); catch; end; quit"
+
+# cd $Shell_dir
+# ./struct_processing/export_gmv_rois.sh '3077,3082,1029,2082,3092,3086,3106,1030' 02_T1 ROI_settings_MiMRedcap_wfuMasked_CAT12.txt
+
+# ./struct_processing/combine_subject_gmv.sh '3077 3082 1029 2082 3092 3086 3106 1030 1002 1004 1007 1009 1010 1012 1013 1018 1019 1020 1022 1025 1026 1027 2002 2007 2012 2013 2015 2017 2018 2020 2021 2022 2023 2025 2026 2033 2034 2037 2038 2039 2042 2052 2059 2062 2027 3004 3006 3007 3008 3010 3021 3026 3028 3029 3030 3036 3039 3040 3041 3042 3043 3046 3047 3051 3053 3054 3056 3058 3059 3063 3066 3068 3069 3070 3071 3072 3073 3074 3076' 02_T1

@@ -1,0 +1,46 @@
+#!/bin/sh
+#SBATCH --job-name=batch_dtialps                         # Job name
+#SBATCH --mail-type=END,FAIL                      # Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=<sumiresato@ufl.edu>          # Where to send mail
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=2                          # Run a single task
+#SBATCH --account=tpengzhao
+#SBATCH --qos=tpengzhao
+#SBATCH --mem=16000mb                               # Memory limit
+#SBATCH --time=96:00:00                           # Time limit hrs:min:sec
+#SBATCH --output=batch_dtialps.%A_%a.out     # Standard output and error log
+##SBATCH --array=0 #array range
+
+
+pwd; hostname; date
+
+subject_array=("sub-TKA006" "sub-TKA007" "sub-TKA009" "sub-TKA010" "sub-TKA011" "sub-TKA012" "sub-TKA013")
+
+
+
+# ######SUMIRE S Directory
+
+cd /blue/tpengzhao/sumiresato
+Shell_dir=/blue/tpengzhao/sumiresato/Shell_Scripts/Pecan_Glymphatics
+Matlab_dir=/blue/tpengzhao/sumiresato/Matlab/Pecan_Glymphatics
+Template_dir=/blue/tpengzhao/SHARED/MR_Templates
+cd $Shell_dir
+
+
+for subject in "${subject_array[@]}"
+do
+    echo "Processing subject $subject"
+    
+       
+    Subject_dir="/blue/tpengzhao/sumiresato/Practice_Data/${subject}/ses-pre"
+    Subject_dir=$(echo "$Subject_dir" | tr -d '\n' | xargs)
+
+
+    cd $Shell_dir
+
+    ./dwi_processing/dtialps_proc.sh $Matlab_dir $Template_dir $Subject_dir copyfiles_ants coreg_dwi normalize_dwi copyfiles_normalizeddwi dtifit_dwi eigenvalues_dtialps
+
+done
+
+
+
